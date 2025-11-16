@@ -1,0 +1,11 @@
+BasedOnStyle: Google
+IndentWidth: 4
+AccessModifierOffset: -2
+BraceWrapping:
+  AfterClass: true
+  AfterStruct: true
+  BeforeFunctionBody: true
+  AfterFunction: false
+  SplitEmptyFunction: false
+AllowShortFunctionsOnASingleLine: None
+ColumnLimit: 0
