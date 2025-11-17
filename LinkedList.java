@@ -41,10 +41,18 @@ public class LinkedList {
   }
 
   public void getHead() {
+   if (head == null) {
+      System.out.println("Head: null");
+      return;
+    }
     System.out.println("Head: " + head.value);
   }
 
   public void getTail() {
+    if (tail == null) {
+      System.out.println("Tail: null");
+      return;
+    }
     System.out.println("Tail: " + tail.value);
   }
 
