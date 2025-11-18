@@ -2,9 +2,10 @@ class Node:
     def __init__(self, value):
         self.value = value
         self.next = None
+        self.prev = None
 
 
-class LinkedList:
+class DoublyLinkedList:
     def __init__(self, value=None):
         if value is None:
             self.head = None
@@ -36,6 +37,7 @@ class LinkedList:
             return True
 
         self.tail.next = new_node
+        new_node.prev = self.tail
         self.tail = new_node
         self.length += 1
         return True
@@ -44,19 +46,16 @@ class LinkedList:
         if self.head is None:
             return None
 
-        temp = self.head
+        temp = self.tail
         if self.length == 1:
             self.head = None
             self.tail = None
             self.length -= 1
             return temp
 
-        prev = self.head
-        while temp.next:
-            prev = temp
-            temp = temp.next
-        self.tail = prev
+        self.tail = temp.prev
         self.tail.next = None
+        temp.prev = None
         self.length -= 1
         return temp
 
@@ -69,6 +68,7 @@ class LinkedList:
             return True
 
         new_node.next = self.head
+        self.head.prev = new_node
         self.head = new_node
         self.length += 1
         return True
@@ -84,7 +84,8 @@ class LinkedList:
             self.length -= 1
             return temp
 
-        self.head = self.head.next
+        self.head = temp.next
+        self.head.prev = None
         temp.next = None
         self.length -= 1
         return temp
@@ -93,9 +94,15 @@ class LinkedList:
         if index < 0 or index >= self.length:
             return None
 
-        temp = self.head
-        for _ in range(index):
-            temp = temp.next
+        if index < self.length / 2:
+            temp = self.head
+            for _ in range(index):
+                temp = temp.next
+            return temp
+
+        temp = self.tail
+        for _ in range(self.length - 1, index, -1):
+            temp = temp.prev
         return temp
 
     def set_value(self, index, value):
@@ -117,9 +124,14 @@ class LinkedList:
             return self.append(value)
 
         new_node = Node(value)
-        prev = self.get(index - 1)
-        new_node.next = prev.next
-        prev.next = new_node
+        before = self.get(index - 1)
+        after = before.next
+
+        before.next = new_node
+        new_node.prev = before
+        new_node.next = after
+        after.prev = new_node
+
         self.length += 1
         return True
 
@@ -133,43 +145,30 @@ class LinkedList:
         if index == self.length - 1:
             return self.pop()
 
-        prev = self.get(index - 1)
-        temp = prev.next
-        prev.next = temp.next
+        temp = self.get(index)
+        before = temp.prev
+        after = temp.next
+
+        before.next = after
+        after.prev = before
         temp.next = None
+        temp.prev = None
+
         self.length -= 1
         return temp
 
-    def reverse(self):
-        temp = self.head
-        self.head = self.tail
-        self.tail = temp
 
-        after = temp.next
-        before = None
-        for _ in range(self.length):
-            after = temp.next
-            temp.next = before
-            before = temp
-            temp = after
+myDLL = DoublyLinkedList(4)
+myDLL.append(5)
+myDLL.append(6)
+myDLL.append(7)
+myDLL.append(8)
+myDLL.append(9)
+myDLL.set_value(3, 100)
 
+myDLL.remove(0)
+myDLL.remove(0)
+myDLL.remove(0)
+myDLL.remove(0)
 
-my_linked_list = LinkedList(4)
-my_linked_list.append(5)
-my_linked_list.append(6)
-
-my_linked_list.pop()
-my_linked_list.pop()
-my_linked_list.pop()
-my_linked_list.pop()
-
-my_linked_list.prepend(1)
-my_linked_list.prepend(2)
-my_linked_list.prepend(3)
-
-my_linked_list.set_value(1, 99)
-my_linked_list.insert(2, 55)
-my_linked_list.print_list()
-
-my_linked_list.reverse()
-my_linked_list.print_list()
+myDLL.print_list()

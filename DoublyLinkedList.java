@@ -2,25 +2,26 @@ class Node {
 
   int value;
   Node next;
+  Node prev;
 
   Node(int value) {
     this.value = value;
   }
 }
 
-public class LinkedList {
+public class DoublyLinkedList {
 
   private Node head;
   private Node tail;
   private int length;
 
-  public LinkedList() {
+  public DoublyLinkedList() {
     head = null;
     tail = null;
     length = 0;
   }
 
-  public LinkedList(int value) {
+  public DoublyLinkedList(int value) {
     Node newNode = new Node(value);
     head = newNode;
     tail = newNode;
@@ -41,10 +42,18 @@ public class LinkedList {
   }
 
   public void getHead() {
+    if (head == null) {
+      System.out.println("Head: null");
+      return;
+    }
     System.out.println("Head: " + head.value);
   }
 
   public void getTail() {
+    if (tail == null) {
+      System.out.println("Tail: null");
+      return;
+    }
     System.out.println("Tail: " + tail.value);
   }
 
@@ -63,6 +72,7 @@ public class LinkedList {
     }
 
     tail.next = newNode;
+    newNode.prev = tail;
     tail = newNode;
     length++;
   }
@@ -70,7 +80,7 @@ public class LinkedList {
   public Node removeLast() {
     if (head == null) return null;
 
-    Node temp = head;
+    Node temp = tail;
     if (length == 1) {
       head = null;
       tail = null;
@@ -78,14 +88,9 @@ public class LinkedList {
       return temp;
     }
 
-    Node pre = head;
-    while (temp.next != null) {
-      pre = temp;
-      temp = temp.next;
-    }
-
-    tail = pre;
+    tail = tail.prev;
     tail.next = null;
+    temp.prev = null;
     length--;
     return temp;
   }
@@ -100,6 +105,7 @@ public class LinkedList {
     }
 
     newNode.next = head;
+    head.prev = newNode;
     head = newNode;
     length++;
   }
@@ -116,6 +122,7 @@ public class LinkedList {
     }
 
     head = head.next;
+    head.prev = null;
     temp.next = null;
     length--;
     return temp;
@@ -125,8 +132,15 @@ public class LinkedList {
     if (index < 0 || index >= length) return null;
 
     Node temp = head;
-    for (int i = 0; i < index; i++) {
-      temp = temp.next;
+    if (index < length / 2) {
+      for (int i = 0; i < index; i++) {
+        temp = temp.next;
+      }
+    } else {
+      temp = tail;
+      for (int i = length - 1; i > index; i--) {
+        temp = temp.prev;
+      }
     }
 
     return temp;
@@ -134,12 +148,10 @@ public class LinkedList {
 
   public boolean set(int index, int value) {
     Node temp = get(index);
-    if (temp != null) {
-      temp.value = value;
-      return true;
-    }
+    if (temp == null) return false;
 
-    return false;
+    temp.value = value;
+    return true;
   }
 
   public boolean insert(int index, int value) {
@@ -156,9 +168,13 @@ public class LinkedList {
     }
 
     Node newNode = new Node(value);
-    Node temp = get(index - 1);
-    newNode.next = temp.next;
-    temp.next = newNode;
+    Node before = get(index - 1);
+    Node after = before.next;
+
+    newNode.prev = before;
+    newNode.next = after;
+    before.next = newNode;
+    after.prev = newNode;
     length++;
     return true;
   }
@@ -169,25 +185,15 @@ public class LinkedList {
     if (index == 0) return removeFirst();
     if (index == length - 1) return removeLast();
 
-    Node prev = get(index - 1);
-    Node temp = prev.next;
-    prev.next = temp.next;
+    Node temp = get(index);
+    Node before = temp.prev;
+    Node after = temp.next;
+
+    before.next = after;
+    after.prev = before;
     temp.next = null;
+    temp.prev = null;
     length--;
     return temp;
-  }
-
-  public void reverse() {
-    Node temp = head;
-    head = tail;
-    tail = temp;
-    Node after = temp.next;
-    Node before = null;
-    for (int i = 0; i < length; i++) {
-      after = temp.next;
-      temp.next = before;
-      before = temp;
-      temp = after;
-    }
   }
 }

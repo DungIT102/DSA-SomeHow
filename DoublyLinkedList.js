@@ -2,10 +2,11 @@ class Note {
   constructor(value) {
     this.value = value;
     this.next = null;
+    this.prev = null;
   }
 }
 
-class LinkedList {
+class DoublyLinkedList {
   constructor(value) {
     if (!value) {
       this.head = null;
@@ -31,6 +32,7 @@ class LinkedList {
     }
 
     this.tail.next = newNode;
+    newNode.prev = this.tail;
     this.tail = newNode;
     this.length++;
   }
@@ -38,7 +40,7 @@ class LinkedList {
   pop() {
     if (!this.head) return undefined;
 
-    let temp = this.head;
+    let temp = this.tail;
     if (this.length === 1) {
       this.head = null;
       this.tail = null;
@@ -46,14 +48,9 @@ class LinkedList {
       return temp;
     }
 
-    let prev = temp;
-    while (temp.next) {
-      prev = temp;
-      temp = temp.next;
-    }
-
-    this.tail = prev;
+    this.tail = temp.prev;
     this.tail.next = null;
+    temp.prev = null;
     this.length--;
     return temp;
   }
@@ -69,6 +66,7 @@ class LinkedList {
     }
 
     newNode.next = this.head;
+    this.head.prev = newNode;
     this.head = newNode;
     this.length++;
   }
@@ -85,6 +83,7 @@ class LinkedList {
     }
 
     this.head = this.head.next;
+    this.head.prev = null;
     temp.next = null;
     this.length--;
     return temp;
@@ -94,20 +93,26 @@ class LinkedList {
     if (index < 0 || index >= this.length) return undefined;
 
     let temp = this.head;
-    for (let i = 0; i < index; i++) {
-      temp = temp.next;
+    if (index < this.length / 2) {
+      for (let i = 0; i < index; i++) {
+        temp = temp.next;
+      }
+    } else {
+      temp = this.tail;
+      for (let i = this.length - 1; i > index; i--) {
+        temp = temp.prev;
+      }
     }
+
     return temp;
   }
 
   set(index, value) {
     let temp = this.get(index);
-    if (temp) {
-      temp.value = value;
-      return true;
-    }
+    if (!temp) return false;
 
-    return false;
+    temp.value = value;
+    return true;
   }
 
   insert(index, value) {
@@ -116,9 +121,13 @@ class LinkedList {
     if (index === this.length) return this.push(value);
 
     const newNode = new Note(value);
-    let temp = this.get(index - 1);
-    newNode.next = temp.next;
-    temp.next = newNode;
+    const before = this.get(index - 1);
+    const after = before.next;
+
+    before.next = newNode;
+    newNode.prev = before;
+    newNode.next = after;
+    after.prev = newNode;
     this.length++;
     return true;
   }
@@ -128,59 +137,26 @@ class LinkedList {
     if (index === 0) return this.shift();
     if (index === this.length - 1) return this.pop();
 
-    let prev = this.get(index - 1);
-    let temp = prev.next;
-    prev.next = temp.next;
+    const temp = this.get(index);
+    const before = temp.prev;
+    const after = temp.next;
+
+    before.next = after;
+    after.prev = before;
     temp.next = null;
+    temp.prev = null;
+
     this.length--;
     return temp;
   }
-
-  reverse() {
-    let temp = this.head;
-    this.head = this.tail;
-    this.tail = temp;
-
-    let next = temp.next;
-    let prev = null;
-    for (let i = 0; i < this.length; i++) {
-      next = temp.next;
-      temp.next = prev;
-      prev = temp;
-      temp = next;
-    }
-  }
 }
 
-let myLinkedList = new LinkedList(2);
-myLinkedList.push(5);
-myLinkedList.push(16);
-console.log(myLinkedList);
+let myDLL = new DoublyLinkedList(2);
+myDLL.push(3);
+myDLL.pop();
+myDLL.pop();
+myDLL.unShift(1);
+myDLL.unShift(99);
+myDLL.unShift(88);
 
-myLinkedList.unShift(1);
-console.log(myLinkedList);
-
-myLinkedList.set(2, 99);
-console.log(myLinkedList.get(2));
-
-myLinkedList.insert(1, 55);
-console.log(myLinkedList);
-
-console.log(myLinkedList.remove(2));
-console.log(myLinkedList);
-
-myLinkedList.reverse();
-console.log(myLinkedList);
-
-// console.log(myLinkedList.shift());
-// console.log(myLinkedList.shift());
-// console.log(myLinkedList.shift());
-// console.log(myLinkedList.shift());
-// console.log(myLinkedList.shift());
-// console.log(myLinkedList);
-
-// console.log(myLinkedList.pop());
-// console.log(myLinkedList.pop());
-// console.log(myLinkedList.pop());
-// console.log(myLinkedList.pop());
-// console.log(myLinkedList);
+console.log(myDLL);

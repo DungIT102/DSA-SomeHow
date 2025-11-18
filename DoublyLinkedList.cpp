@@ -5,13 +5,16 @@ class Node {
   public:
     int value;
     Node* next;
+    Node* prev;
+
     Node(int val) {
         value = val;
         next = nullptr;
+        prev = nullptr;
     }
 };
 
-class LinkedList {
+class DoublyLinkedList {
   private:
     Node* head;
     Node* tail;
@@ -19,13 +22,13 @@ class LinkedList {
 
   public:
     /* Constructor */
-    LinkedList() {
+    DoublyLinkedList() {
         head = nullptr;
         tail = nullptr;
         length = 0;
     }
 
-    LinkedList(int value) {
+    DoublyLinkedList(int value) {
         Node* newNode = new Node(value);
         head = newNode;
         tail = newNode;
@@ -33,7 +36,7 @@ class LinkedList {
     }
 
     /* Destructor */
-    ~LinkedList() {
+    ~DoublyLinkedList() {
         Node* temp = head;
         while (temp != nullptr) {
             head = head->next;
@@ -87,6 +90,7 @@ class LinkedList {
         }
 
         tail->next = newNode;
+        newNode->prev = tail;
         tail = newNode;
         length++;
         return true;
@@ -102,15 +106,10 @@ class LinkedList {
             return;
         }
 
-        Node* temp = head;
-        Node* prev = nullptr;
-        while (temp->next != nullptr) {
-            prev = temp;
-            temp = temp->next;
-        }
-
-        tail = prev;
+        Node* temp = tail;
+        tail = tail->prev;
         tail->next = nullptr;
+        temp->prev = nullptr;
         length--;
         delete temp;
     }
@@ -125,6 +124,7 @@ class LinkedList {
         }
 
         newNode->next = head;
+        head->prev = newNode;
         head = newNode;
         length++;
         return true;
@@ -142,6 +142,7 @@ class LinkedList {
 
         Node* temp = head;
         head = head->next;
+        head->prev = nullptr;
         temp->next = nullptr;
         length--;
         delete temp;
@@ -150,9 +151,17 @@ class LinkedList {
     Node* get(int index) {
         if (index < 0 || index >= length) return nullptr;
         Node* temp = head;
-        for (int i = 0; i < index; i++) {
-            temp = temp->next;
+        if (index < length / 2) {
+            for (int i = 0; i < index; i++) {
+                temp = temp->next;
+            }
+        } else {
+            temp = tail;
+            for (int i = length - 1; i > index; i--) {
+                temp = temp->prev;
+            }
         }
+
         return temp;
     }
 
@@ -169,9 +178,13 @@ class LinkedList {
         if (index == length) return append(value);
 
         Node* newNode = new Node(value);
-        Node* prev = get(index - 1);
-        newNode->next = prev->next;
-        prev->next = newNode;
+        Node* before = get(index - 1);
+        Node* after = before->next;
+
+        before->next = newNode;
+        newNode->prev = before;
+        newNode->next = after;
+        after->prev = newNode;
         length++;
         return true;
     }
@@ -181,57 +194,32 @@ class LinkedList {
         if (index == 0) return deleteFirst();
         if (index == length - 1) return deleteLast();
 
-        Node* prev = get(index - 1);
-        Node* temp = prev->next;
-        prev->next = temp->next;
+        Node* temp = get(index);
+        Node* before = temp->prev;
+        Node* after = temp->next;
+
+        before->next = after;
+        after->prev = before;
         temp->next = nullptr;
+        temp->prev = nullptr;
         length--;
         delete temp;
-    }
-
-    void reverse() {
-        Node* temp = head;
-        head = tail;
-        tail = temp;
-
-        Node* after = temp->next;
-        Node* before = nullptr;
-        for (int i = 0; i < length; i++) {
-            after = temp->next;
-            temp->next = before;
-            before = temp;
-            temp = after;
-        }
     }
 };
 
 int main() {
-    LinkedList* myLinkedList = new LinkedList(1);
+    DoublyLinkedList* myDLL = new DoublyLinkedList(1);
+    myDLL->append(2);
+    myDLL->append(3);
+    myDLL->prepend(99);
+    myDLL->deleteNode(0);
+    myDLL->deleteNode(0);
+    myDLL->deleteNode(0);
+    myDLL->deleteNode(0);
+    myDLL->deleteNode(0);
 
-    myLinkedList->append(2);
-    myLinkedList->append(3);
+    myDLL->printList();
 
-    myLinkedList->deleteLast();
-    myLinkedList->deleteLast();
-    myLinkedList->deleteLast();
-
-    myLinkedList->prepend(4);
-    myLinkedList->prepend(5);
-
-    // myLinkedList->deleteFirst();
-    // myLinkedList->set(0, 88);
-
-    myLinkedList->insert(2, 99);
-    myLinkedList->insert(1, 77);
-
-    myLinkedList->getHead();
-    myLinkedList->getTail();
-    myLinkedList->getLength();
-    myLinkedList->printList();
-
-    myLinkedList->reverse();
-    myLinkedList->printList();
-
-    delete myLinkedList;
+    delete myDLL;
     return 0;
 }
